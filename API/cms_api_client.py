@@ -34,7 +34,7 @@ class CMSAPIClient:
     def build_cache(self, ccn, limit):
         """
         We can rely on caching because we are returning all the relevant data at once
-        Preconditions: ccn_text is non-empty
+        Preconditions: ccn is non-empty
         """
         ccn_text = str(ccn).strip()
         query_body = {
