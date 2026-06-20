@@ -1,0 +1,4 @@
+requests
+streamlit
+reportlab
+python-docx
