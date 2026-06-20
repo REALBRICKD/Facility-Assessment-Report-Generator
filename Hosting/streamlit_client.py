@@ -1,7 +1,7 @@
 from API.cms_api_claims_quality_measure import CMS_API_Claims_Quality_Measure_Client
 from API.cms_provider_info_client import CMS_Provider_Info_Client
-from FileExport.docx_export import build_docx_export
-from FileExport.pdf_export import build_pdf_export
+from FileExport.python_docx_client import build_docx_export
+from FileExport.reportlab_client import build_pdf_export
 
 import streamlit as st
 
@@ -9,16 +9,21 @@ PROVIDER_DATASET_ID = "4pq5-n9py"
 CLAIMS_DATASET_ID = "ijh5-nb2v"
 
 def normalize_ccn(raw_ccn):
+    """
+    Handles ccn input and validates input
+    """
     ccn_text = str(raw_ccn).strip()
     if not ccn_text.isdigit() or len(ccn_text) != 6:
         raise ValueError("CCN must be a 6-digit numeric value.")
     return ccn_text
 
 def display_value(value, fallback="N/A"):
+    """
+    Displays a value or returns a fallback if the value is None or empty.
+    """
     if value in (None, ""):
         return fallback
     return str(value)
-
 
 def normalize_numeric_input(raw_value):
     numeric_text = str(raw_value).strip()
@@ -27,10 +32,12 @@ def normalize_numeric_input(raw_value):
     try:
         return int(numeric_text)
     except ValueError as exc:
-        raise ValueError("Current Census must be a whole number.") from exc
-
+        raise ValueError("Input must be a whole number.") from exc
 
 def build_location_line(address, city, state):
+    """
+    Append address, city, and state
+    """
     address_text = display_value(address)
     city_text = str(city).strip() if city not in (None, "") else ""
     state_text = str(state).strip() if state not in (None, "") else ""
@@ -47,6 +54,9 @@ def build_location_line(address, city, state):
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def fetch_report_data(ccn_text, custom_name, emr, current_census, patient_type, previous_coverage, previous_provider_performance, medical_coverage):
+    """
+    Build both caches for a given ccn and return all the data used in the report
+    """
     provider_client = CMS_Provider_Info_Client(PROVIDER_DATASET_ID)
     provider_client.build_cache(ccn_text, limit=1)
 
@@ -127,18 +137,55 @@ def report_rows(report_data):
     ]
 
 def run_app():
+    """
+    Build webpage with Streamlit, build pdf and docx if submit button is pressed
+    """
     st.set_page_config(page_title="Facility Assessment Snapshot", page_icon="🏥", layout="wide")
     st.markdown(
         """
         <style>
+            :root {
+                color-scheme: light;
+            }
             .stApp {
                 background: #FFFFFF;
                 color: #000000;
+            }
+            [data-testid="stHeader"],
+            [data-testid="stToolbar"],
+            #MainMenu,
+            footer {
+                visibility: hidden;
+                height: 0;
             }
             .block-container {
                 max-width: 1180px;
                 padding-top: 2rem;
                 padding-bottom: 2rem;
+            }
+            .stTextInput input,
+            .stNumberInput input,
+            .stTextArea textarea,
+            .stSelectbox div[data-baseweb="select"] > div,
+            .stMultiSelect div[data-baseweb="select"] > div {
+                background-color: #FFFFFF !important;
+                color: #000000 !important;
+                border-color: #B8B8B8 !important;
+            }
+            .stTextInput input::placeholder,
+            .stNumberInput input::placeholder,
+            .stTextArea textarea::placeholder {
+                color: #666666 !important;
+                opacity: 1;
+            }
+            div[data-testid="stFormSubmitButton"] button,
+            div[data-testid="stButton"] button,
+            div[data-testid="stDownloadButton"] button,
+            button[kind="primary"],
+            button[kind="secondary"] {
+                background-color: #111111 !important;
+                color: #FFFFFF !important;
+                border: 1px solid #111111 !important;
             }
             .brand-banner {
                 text-align: center;

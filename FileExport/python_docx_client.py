@@ -10,7 +10,6 @@ def _display_value(value, fallback="N/A"):
         return fallback
     return str(value)
 
-
 def _build_rows(report_data):
     claims = report_data["claims_summary"]
     return [
@@ -42,7 +41,6 @@ def _build_rows(report_data):
         ("LT ED Visits National Avg.", claims.get("lt_ed_national_avg")),
         ("LT ED Visits State Avg.", claims.get("lt_ed_state_avg")),
     ]
-
 
 def build_docx_export(report_data):
     document = Document()

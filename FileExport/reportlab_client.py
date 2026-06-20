@@ -15,7 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - depends on local environment
     styles_module = None
     units_module = None
     platypus_module = None
-
+"""
 PDF_EXPORT_AVAILABLE = all(
     module is not None
     for module in (
@@ -27,6 +27,7 @@ PDF_EXPORT_AVAILABLE = all(
         platypus_module,
     )
 )
+"""
 
 def _display_value(value, fallback="N/A"):
     if value in (None, ""):
@@ -66,8 +67,8 @@ def _build_rows(report_data):
     ]
 
 def build_pdf_export(report_data):
-    if not PDF_EXPORT_AVAILABLE:
-        raise RuntimeError("PDF export requires the 'reportlab' package. Install dependencies from requirements.txt.")
+    # if not PDF_EXPORT_AVAILABLE:
+        # raise RuntimeError("PDF export requires the 'reportlab' package. Install dependencies from requirements.txt.")
 
     colors = reportlab_lib.colors
     TA_CENTER = enums_module.TA_CENTER
