@@ -125,6 +125,18 @@ def build_pdf_export(report_data):
     )
 
     header_state = _display_value(report_data.get("state"))
+    ccn = _display_value(report_data.get("ccn"), fallback="")
+    care_compare_url = f"https://www.medicare.gov/care-compare/details/nursing-home/{ccn}"
+    care_compare_style = ParagraphStyle(
+        "CareCompareLink",
+        parent=styles["BodyText"],
+        fontName="Helvetica",
+        fontSize=9,
+        leading=11,
+        alignment=TA_CENTER,
+        textColor=colors.blue,
+        spaceAfter=10,
+    )
     table_data = [[label, _display_value(value)] for label, value in _build_rows(report_data)]
 
     table = Table(table_data, colWidths=[2.7 * inch, 4.0 * inch])
@@ -150,6 +162,10 @@ def build_pdf_export(report_data):
         Paragraph("INFINITE — Managed by MEDELITE", banner_style),
         Paragraph("FACILITY ASSESSMENT SNAPSHOT", title_style),
         Paragraph(header_state, state_style),
+        Paragraph(
+            f'Official Medicare Care Compare profile: <link href="{care_compare_url}">{care_compare_url}</link>',
+            care_compare_style,
+        ),
         Spacer(1, 0.08 * inch),
         table,
     ]

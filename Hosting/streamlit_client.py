@@ -105,6 +105,9 @@ def fetch_report_data(ccn_text, custom_name, emr, current_census, patient_type, 
     }
 
 def report_rows(report_data):
+    """
+    Fetches info from report data cache to display
+    """
     claims = report_data["claims_summary"]
     return [
         {"Field": "Name of Facility", "Value": display_value(report_data["facility_name"])},
@@ -135,6 +138,78 @@ def report_rows(report_data):
         {"Field": "LT ED Visits National Avg.", "Value": display_value(claims["lt_ed_national_avg"])},
         {"Field": "LT ED Visits State Avg.", "Value": display_value(claims["lt_ed_state_avg"])},
     ]
+
+def metric_card_html(label, value, sublabel=""):
+    """
+    Generates HTML for a metric card with a label, value, and optional sublabel.
+    """
+    sublabel_html = f'<div class="metric-sublabel">{sublabel}</div>' if sublabel else ""
+    return f'''
+        <div class="metric-card">
+            <div class="metric-label">{label}</div>
+            <div class="metric-value">{value}</div>
+            {sublabel_html}
+        </div>
+    '''
+
+def render_performance_dashboard(report_data):
+    """
+    Renders the performance dashboard with metrics and claims comparison for state and national values.
+    """
+    performance_cards = st.columns(4)
+    metric_values = [
+        ("Overall Star Rating", display_value(report_data["overall_rating"]), "CMS score"),
+        ("Health Inspection", display_value(report_data["health_inspection_rating"]), "Survey results"),
+        ("Staffing", display_value(report_data["staffing_rating"]), "Staffing performance"),
+        ("Quality of Resident Care", display_value(report_data["quality_of_resident_care_rating"]), "Resident care quality"),
+    ]
+    for column, (label, value, sublabel) in zip(performance_cards, metric_values):
+        with column:
+            st.markdown(metric_card_html(label, value, sublabel), unsafe_allow_html=True)
+
+    st.markdown("### Claims Comparison")
+    st.caption("Facility performance compared with state and national averages.")
+
+    claims = report_data["claims_summary"]
+    comparison_rows = [
+        (
+            "Short Term Hospitalization",
+            claims["str_hosp_score"],
+            claims["str_hosp_state_avg"],
+            claims["str_hosp_national_avg"],
+        ),
+        (
+            "Short Term ED Visit",
+            claims["str_ed_score"],
+            claims["str_ed_state_avg"],
+            claims["str_ed_national_avg"],
+        ),
+        (
+            "Long Term Hospitalization",
+            claims["lt_hosp_score"],
+            claims["lt_hosp_state_avg"],
+            claims["lt_hosp_national_avg"],
+        ),
+        (
+            "Long Term ED Visit",
+            claims["lt_ed_score"],
+            claims["lt_ed_state_avg"],
+            claims["lt_ed_national_avg"],
+        ),
+    ]
+
+    for metric_label, facility_value, state_value, national_value in comparison_rows:
+        st.markdown(f"#### {metric_label}")
+        row_columns = st.columns(3)
+        with row_columns[0]:
+            st.markdown(metric_card_html("Facility", display_value(facility_value), "Performance score"), unsafe_allow_html=True)
+        with row_columns[1]:
+            st.markdown(metric_card_html("State Avg", display_value(state_value), "Benchmark"), unsafe_allow_html=True)
+        with row_columns[2]:
+            st.markdown(metric_card_html("National Avg", display_value(national_value), "Benchmark"), unsafe_allow_html=True)
+
+    st.markdown("### Full Performance Snapshot")
+    st.dataframe(report_rows(report_data), use_container_width=True, hide_index=True)
 
 def run_app():
     """
@@ -210,6 +285,33 @@ def run_app():
                 color: #000000;
                 margin-bottom: 1rem;
             }
+            .metric-card {
+                background: linear-gradient(180deg, #FFFFFF 0%, #F7F7F7 100%);
+                border: 1px solid #D9D9D9;
+                border-radius: 16px;
+                padding: 1rem 1rem 0.85rem;
+                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+                height: 100%;
+            }
+            .metric-label {
+                font-size: 0.82rem;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: #444444;
+                margin-bottom: 0.55rem;
+            }
+            .metric-value {
+                font-size: 2rem;
+                font-weight: 800;
+                line-height: 1;
+                color: #111111;
+                margin-bottom: 0.4rem;
+            }
+            .metric-sublabel {
+                font-size: 0.9rem;
+                color: #666666;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -259,7 +361,7 @@ def run_app():
     if st.session_state.report_data:
         report_data = st.session_state.report_data
         st.markdown(f'<div class="brand-state">{display_value(report_data["state"])}</div>', unsafe_allow_html=True)
-        st.table(report_rows(report_data))
+        render_performance_dashboard(report_data)
 
         docx_bytes = build_docx_export(report_data)
         pdf_bytes = build_pdf_export(report_data)
