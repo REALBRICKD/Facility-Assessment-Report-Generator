@@ -60,21 +60,21 @@ def build_docx_export(report_data):
     title_run = title.add_run("INFINITE — Managed by MEDELITE")
     title_run.bold = True
     title_run.font.size = Pt(18)
-    title_run.font.name = "Arial"
+    title_run.font.name = "Helvetica"
 
     subtitle = document.add_paragraph()
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     subtitle_run = subtitle.add_run("FACILITY ASSESSMENT SNAPSHOT")
     subtitle_run.bold = True
     subtitle_run.font.size = Pt(14)
-    subtitle_run.font.name = "Arial"
+    subtitle_run.font.name = "Helvetica"
 
     state_paragraph = document.add_paragraph()
     state_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     state_run = state_paragraph.add_run(_display_value(report_data.get("state")))
     state_run.bold = True
     state_run.font.size = Pt(12)
-    state_run.font.name = "Arial"
+    state_run.font.name = "Helvetica"
 
     table = document.add_table(rows=1, cols=2)
     table.style = "Table Grid"
