@@ -109,7 +109,7 @@ The project depends on `streamlit`, `requests`, `python-docx`, and `reportlab`.
 ### 4. Run the app
 
 ```bash
-streamlit run main.py
+streamlit run Hosting/streamlit_client.py
 ```
 
 ### 5. Use the application
