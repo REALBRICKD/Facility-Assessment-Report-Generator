@@ -1,10 +1,13 @@
 # Facility Assessment Report Generator
 
-## Project Title and Executive Summary
+## Web App Link
+https://facility-assessment-report-generator-070i.onrender.com/
 
-A Python/Streamlit application for building a facility-level assessment snapshot from CMS datasets and a small set of optional manual inputs. The app looks up a nursing facility by CCN, pulls provider profile data and claims-based quality measures from CMS datasets, then assembles a formatted report that can be reviewed in the browser or exported as Word and PDF documents.
+## Overview
 
-The workflow is simple: enter a valid 6-digit CCN, add contextual fields such as EMR, current census, patient type, and MedElite history, then fetch the report. The app stores the resulting report in Streamlit session state so the user can review the dashboard and download the generated files without repeating the lookup.
+This is a Python/Streamlit application for building a facility-level assessment snapshot from CMS datasets and a small set of optional manual inputs. The app looks up a nursing facility by CCN, pulls provider profile data and claims-based quality measures from CMS datasets, then assembles a formatted report that can be reviewed in the browser or exported as Word and PDF documents.
+
+The web application provides a page for the user to enter a valid 6-digit CCN, add contextual fields such as EMR, current census, patient type, and MedElite history, then fetch the report. It stores the resulting report in the Streamlit session state so the user can review the dashboard and download the generated files without repeating the lookup.
 
 ## Core Architectural Design Decisions
 
@@ -13,8 +16,6 @@ The application is split into three layers:
 1. `Hosting/streamlit_client.py` handles the UI, form validation, session state, and download actions.
 2. `API/` contains the CMS data clients that query and cache remote records.
 3. `FileExport/` renders the final report into DOCX and PDF formats.
-
-Key implementation choices reflected in the code:
 
 - CMS data is fetched by CCN and cached in memory so the app can render the full report from one lookup cycle.
 - Provider metadata comes from the CMS Nursing Home Provider dataset (`4pq5-n9py`), which supplies the facility name, address, city, state, bed count, and star ratings.
@@ -59,12 +60,12 @@ https://data.cms.gov/provider-data/dataset/4pq5-n9py
 - Quality of Resident Care (qm_rating)
 
 We will need manual input for:
-EMR
-current census
-type of patient
-medelite history (previous coverage from medelite)
-medical coverage
-Previous Provider Performance from Medelite
+- EMR
+- current census
+- type of patient
+- medelite history (previous coverage from medelite)
+- medical coverage
+- Previous Provider Performance from Medelite
 
 For the Hospitalization/ED metrics, we query by measure_code from this dataset:
 https://data.cms.gov/provider-data/dataset/ijh5-nb2v
