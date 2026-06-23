@@ -5,11 +5,17 @@ https://facility-assessment-report-generator-070i.onrender.com/
 
 ## Overview
 
-This is a Python/Streamlit application for building a facility-level assessment snapshot from CMS datasets and a small set of optional manual inputs. The app looks up a nursing facility by CCN, pulls provider profile data* and claims-based quality measures from CMS datasets, then assembles a formatted report that can be reviewed in the browser or exported as Word and PDF documents.
+This is a Python/Streamlit application for building a facility-level assessment snapshot from CMS datasets and a small set of optional manual inputs. The app looks up a nursing facility by CCN, pulls provider profile data and claims-based quality measures from CMS datasets, then assembles a formatted report that can be reviewed in the browser or exported as Word and PDF documents.
 
 The web application provides a page for the user to enter a valid 6-digit CCN, add contextual fields such as EMR, current census, patient type, and MedElite history, then fetch the report. It stores the resulting report in the Streamlit session state so the user can review the dashboard and download the generated files without repeating the lookup.
 
-*The app uses the legal name provided by the API for any given facility (if found) by default, or if the input value is just white space. When an override value is provided, the trimmed value is used instead. 
+### How To Use The Application
+
+1. Enter a 6-digit CCN.
+2. Optionally override the facility name.
+3. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
+4. Select **Fetch Facility Data**.
+5. Review the performance dashboard and download the generated PDF or Word report.
 
 ## Tech Stack & Override Logic
 
@@ -45,7 +51,7 @@ Some engineering assumptions in this implementation are:
 
 ## API Endpoints Queried
 
-We will have to query this dataset for the following features:
+We will have to query the CMS Provider Info dataset for the following features:
 https://data.cms.gov/provider-data/dataset/4pq5-n9py
 - location (provider_name)
 - name of facility (provider_address)
@@ -55,7 +61,7 @@ https://data.cms.gov/provider-data/dataset/4pq5-n9py
 - Staffing (staffing_rating)
 - Quality of Resident Care (qm_rating)
 
-For the Hospitalization/ED metrics, we query by measure_code from this dataset:
+For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims Quality Measure dataset:
 https://data.cms.gov/provider-data/dataset/ijh5-nb2v
 - "521": for short-term hospitalization metrics
 - "522": for short-term ED metrics
@@ -108,21 +114,9 @@ The project depends on `streamlit`, `requests`, `python-docx`, and `reportlab`.
 streamlit run Hosting/streamlit_client.py
 ```
 
-### 5. Use the application
-
-1. Enter a 6-digit CCN.
-2. Optionally override the facility name.
-3. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
-4. Select **Fetch Facility Data**.
-5. Review the performance dashboard and download the generated PDF or Word report.
-
-## Data Sources
-
-- CMS Nursing Home Provider dataset: `https://data.cms.gov/provider-data/dataset/4pq5-n9py`
-- CMS claims quality measure dataset: `https://data.cms.gov/provider-data/dataset/ijh5-nb2v`
-
 ## Notes
 
 - `main.py` is only a thin entry point; all application logic starts in `Hosting/streamlit_client.py`.
 - If you change the report schema in the API layer, update both export modules so the DOCX and PDF output stay in sync with the dashboard.
 - If ReportLab is unavailable in a local environment, install the dependencies from `requirements.txt` before trying to use PDF export.
+- The app uses the legal name provided by the API for any given facility (if found) by default, or if the input value is just white space. When an override value is provided, the trimmed value is used instead. 
