@@ -1,33 +1,12 @@
 from importlib import import_module
 from io import BytesIO
 
-try:
-    reportlab_lib = import_module("reportlab.lib")
-    enums_module = import_module("reportlab.lib.enums")
-    pagesizes_module = import_module("reportlab.lib.pagesizes")
-    styles_module = import_module("reportlab.lib.styles")
-    units_module = import_module("reportlab.lib.units")
-    platypus_module = import_module("reportlab.platypus")
-except ModuleNotFoundError:  # pragma: no cover - depends on local environment
-    reportlab_lib = None
-    enums_module = None
-    pagesizes_module = None
-    styles_module = None
-    units_module = None
-    platypus_module = None
-"""
-PDF_EXPORT_AVAILABLE = all(
-    module is not None
-    for module in (
-        reportlab_lib,
-        enums_module,
-        pagesizes_module,
-        styles_module,
-        units_module,
-        platypus_module,
-    )
-)
-"""
+import reportlab.lib
+import reportlab.lib.enums
+import reportlab.lib.pagesizes
+import reportlab.lib.styles
+import reportlab.lib.units
+import reportlab.platypus
 
 def _display_value(value, fallback="N/A"):
     if value in (None, ""):
@@ -67,20 +46,21 @@ def _build_rows(report_data):
     ]
 
 def build_pdf_export(report_data):
-    # if not PDF_EXPORT_AVAILABLE:
-        # raise RuntimeError("PDF export requires the 'reportlab' package. Install dependencies from requirements.txt.")
+    """
+    Builds a PDF export of the facility assessment report, returning the generated PDF bytes.
+    """
 
-    colors = reportlab_lib.colors
-    TA_CENTER = enums_module.TA_CENTER
-    letter = pagesizes_module.letter
-    ParagraphStyle = styles_module.ParagraphStyle
-    getSampleStyleSheet = styles_module.getSampleStyleSheet
-    inch = units_module.inch
-    Paragraph = platypus_module.Paragraph
-    SimpleDocTemplate = platypus_module.SimpleDocTemplate
-    Spacer = platypus_module.Spacer
-    Table = platypus_module.Table
-    TableStyle = platypus_module.TableStyle
+    colors = reportlab.lib.colors
+    TA_CENTER = reportlab.lib.enums.TA_CENTER
+    letter = reportlab.lib.pagesizes.letter
+    ParagraphStyle = reportlab.lib.styles.ParagraphStyle
+    getSampleStyleSheet = reportlab.lib.styles.getSampleStyleSheet
+    inch = reportlab.lib.units.inch
+    Paragraph = reportlab.platypus.Paragraph
+    SimpleDocTemplate = reportlab.platypus.SimpleDocTemplate
+    Spacer = reportlab.platypus.Spacer
+    Table = reportlab.platypus.Table
+    TableStyle = reportlab.platypus.TableStyle
 
     buffer = BytesIO()
     document = SimpleDocTemplate(

@@ -66,7 +66,9 @@ class CMS_API_Claims_Quality_Measure_Client(cms_api_client.CMS_API_Client):
         return parsed_payload
 
     def _get_empty_fallback(self):
-        """Supplies unified layout data schema fallbacks"""
+        """
+        Supplies unified layout data schema fallbacks
+        """
         return {
             "str_hosp_score": "N/A", "str_hosp_state_avg": "21.40", "str_hosp_national_avg": "22.10",
             "str_ed_score": "N/A",    "str_ed_state_avg": "11.20",   "str_ed_national_avg": "12.50",

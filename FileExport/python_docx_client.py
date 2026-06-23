@@ -42,6 +42,9 @@ def _build_rows(report_data):
     ]
 
 def build_docx_export(report_data):
+    """
+    builds document in buffer and returns it as a byte stream
+    """
     document = Document()
     section = document.sections[0]
     section.top_margin = Inches(0.6)
