@@ -37,7 +37,7 @@ Some engineering assumptions in this implementation are:
 
 ## Tech Stack & Override Logic
 
-- The technical stack is as follows: 
+The technical stack is as follows: 
 - Language: Python
 - UI: Streamlit
 - CMS API Calls: Requests
