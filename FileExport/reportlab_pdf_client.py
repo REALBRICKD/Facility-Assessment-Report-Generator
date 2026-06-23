@@ -1,3 +1,6 @@
+"""
+Fetches user inputs from the Streamlit web interface and generates a facility assessment report in PDF format using ReportLab.
+"""
 from importlib import import_module
 from io import BytesIO
 

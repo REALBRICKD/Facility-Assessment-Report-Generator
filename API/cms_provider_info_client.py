@@ -1,3 +1,7 @@
+"""
+Wrapper for CMS Provider Info Dataset API. This class provides methods to fetch and cache provider information based on the CMS Certification Number (CCN).
+"""
+
 from API import cms_api_client
 
 class CMS_Provider_Info_Client(cms_api_client.CMS_API_Client):

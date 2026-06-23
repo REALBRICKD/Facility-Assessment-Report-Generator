@@ -1,7 +1,11 @@
+"""
+Client for Streamlit API, handles web UI and parses user inputs.
+"""
+
 from API.cms_api_claims_quality_measure import CMS_API_Claims_Quality_Measure_Client
 from API.cms_provider_info_client import CMS_Provider_Info_Client
 from FileExport.python_docx_client import build_docx_export
-from FileExport.reportlab_client import build_pdf_export
+from FileExport.reportlab_pdf_client import build_pdf_export
 
 import streamlit as st
 
@@ -327,12 +331,12 @@ def run_app():
 
     with st.form("facility_lookup_form"):
         st.subheader("Manual Inputs")
-        ccn_input = st.text_input("CCN", placeholder="Enter a 6-digit CMS Certification Number")
-        custom_name = st.text_input("Facility Name Override (optional)", placeholder="Leave blank to use the CMS legal name")
+        ccn_input = st.text_input("CCN (6-digit number - required)", placeholder="Enter a 6-digit CMS Certification Number")
+        custom_name = st.text_input("Facility Name Override", placeholder="Leave blank to use the CMS legal name")
         emr = st.text_input("EMR", placeholder="Enter EMR")
         current_census_input = st.text_input("Current Census", placeholder="Enter a whole number")
         patient_type = st.text_input("Type of Patient", placeholder="Enter type of patient")
-        previous_coverage = st.selectbox("Previous Coverage from MedElite", options=("Yes", "No"))
+        previous_coverage = st.selectbox("Previous Coverage from MedElite (Yes/No)", options=("Yes", "No"))
         previous_provider_performance = st.text_input("Previous Provider Performance from MedElite", placeholder="Enter prior provider performance notes")
         medical_coverage = st.text_input("Medical Coverage", placeholder="Enter medical coverage")
         fetch_clicked = st.form_submit_button("Fetch Facility Data")

@@ -1,3 +1,6 @@
+"""
+Parent class for CMS API clients. This class provides common functionality for interacting with the CMS API, including building a cache of records based on the CMS Certification Number (CCN).
+"""
 import requests
 
 class CMS_API_Client:

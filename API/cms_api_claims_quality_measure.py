@@ -1,3 +1,6 @@
+"""
+Wrapper for CMS Claims Quality Measure Dataset API. This class provides methods to fetch and cache provider information based on the CMS Certification Number (CCN).
+"""
 import requests
 
 from API import cms_api_client

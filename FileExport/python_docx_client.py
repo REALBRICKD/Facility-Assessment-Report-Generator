@@ -1,3 +1,6 @@
+"""
+Fetches user inputs from the Streamlit web interface and generates a facility assessment report in DOCX format using python-docx.
+"""
 from io import BytesIO
 
 from docx import Document

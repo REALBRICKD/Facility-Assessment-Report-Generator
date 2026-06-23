@@ -2,3 +2,4 @@ requests
 streamlit
 reportlab
 python-docx
+pytest
