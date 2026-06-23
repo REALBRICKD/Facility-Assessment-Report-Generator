@@ -51,8 +51,7 @@ Some engineering assumptions in this implementation are:
 
 ## API Endpoints Queried
 
-We will have to query the CMS Provider Info dataset for the following features:
-https://data.cms.gov/provider-data/dataset/4pq5-n9py
+We will have to query the CMS Provider Info dataset (https://data.cms.gov/provider-data/dataset/4pq5-n9py) for the following features:
 - location (provider_name)
 - name of facility (provider_address)
 - census capacity (number_of_certified_beds)
@@ -61,8 +60,7 @@ https://data.cms.gov/provider-data/dataset/4pq5-n9py
 - Staffing (staffing_rating)
 - Quality of Resident Care (qm_rating)
 
-For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims Quality Measure dataset:
-https://data.cms.gov/provider-data/dataset/ijh5-nb2v
+For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims Quality Measure dataset (https://data.cms.gov/provider-data/dataset/ijh5-nb2v):
 - "521": for short-term hospitalization metrics
 - "522": for short-term ED metrics
 - "551": for long-term hospitalization metrics
