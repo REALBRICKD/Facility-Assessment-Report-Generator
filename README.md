@@ -24,6 +24,10 @@ The application is split into three layers:
 - The report uses a shared data structure for on-screen display and export generation, which keeps the dashboard, DOCX output, and PDF output aligned.
 - The UI applies custom CSS to keep the interface branded, hide Streamlit chrome, and present the key metrics as cards instead of a plain form-only workflow.
 
+## Data Flow Diagram
+
+![Facility Assessment Report Generator data flow](docs/data-flow.png)
+
 ## Engineering Assumptions
 
 Some engineering assumptions in this implementation are:
