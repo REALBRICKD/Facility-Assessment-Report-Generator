@@ -35,6 +35,44 @@ Some engineering assumptions in this implementation are:
 - Users will supply business-context inputs (EMR, patient type, prior coverage/performance, medical coverage) accurately; these are not CMS-derived.
 - Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
 
+## Tech Stack & Override Logic
+
+The technical stack is as follows: 
+- Language: Python
+- UI: Streamlit
+- CMS API Calls: Requests
+- PDF Export: Reportlab
+- Word Export: python-docx
+
+The app uses the legal name provided by the API for any given facility (if found) by default, or if the input value is just white space. When an override value is provided, the trimmed value is used instead. 
+
+## API Endpoints Queried
+
+We will have to query this dataset for the following features:
+https://data.cms.gov/provider-data/dataset/4pq5-n9py
+- location (provider_name)
+- name of facility (provider_address)
+- census capacity (number_of_certified_beds)
+- overall star rating (overall_rating)
+- Health Inspection (health_inspection_rating)
+- Staffing (staffing_rating)
+- Quality of Resident Care (qm_rating)
+
+We will need manual input for:
+EMR
+current census
+type of patient
+medelite history (previous coverage from medelite)
+medical coverage
+Previous Provider Performance from Medelite
+
+For the Hospitalization/ED metrics, we query by measure_code from this dataset:
+https://data.cms.gov/provider-data/dataset/ijh5-nb2v
+- "521": for short-term hospitalization metrics
+- "522": for short-term ED metrics
+- "551": for long-term hospitalization metrics
+- "552": for long-term ED metrics
+
 ## Quick-Start Local Installation Guide
 
 ### 1. Prerequisites
