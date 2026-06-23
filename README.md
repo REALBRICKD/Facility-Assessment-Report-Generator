@@ -59,12 +59,12 @@ https://data.cms.gov/provider-data/dataset/4pq5-n9py
 - Quality of Resident Care (qm_rating)
 
 We will need manual input for:
-EMR
-current census
-type of patient
-medelite history (previous coverage from medelite)
-medical coverage
-Previous Provider Performance from Medelite
+- EMR
+- current census
+- type of patient
+- medelite history (previous coverage from medelite)
+- medical coverage
+- Previous Provider Performance from Medelite
 
 For the Hospitalization/ED metrics, we query by measure_code from this dataset:
 https://data.cms.gov/provider-data/dataset/ijh5-nb2v
