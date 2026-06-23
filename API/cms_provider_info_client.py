@@ -1,29 +1,3 @@
-"""
-Assumption: The application uses the CMS Nursing Home Provider dataset 
-because the assignment references CMS star ratings, CCN lookup, and 
-Medicare Care Compare nursing-home profile URLs.
-
-We will have to query this datasets:
-https://data.cms.gov/provider-data/dataset/4pq5-n9py
-location (provider_name)
-name of facility (provider_address)
-census capacity (number_of_certified_beds)
-overall star rating (overall_rating)
-Health Inspection (health_inspection_rating)
-Staffing (staffing_rating)
-Quality of Resident Care (qm_rating)
-
-We will need manual input for:
-EMR
-current census
-type of patient
-medelite history (previous coverage from medelite)
-medical coverage
-Previous Provider Performance from Medelite
-
-For the bonus, we query from this dataset:
-https://data.cms.gov/provider-data/dataset/ijh5-nb2v
-"""
 from API import cms_api_client
 
 class CMS_Provider_Info_Client(cms_api_client.CMS_API_Client):

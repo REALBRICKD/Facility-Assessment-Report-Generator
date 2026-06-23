@@ -8,7 +8,7 @@ class CMS_API_Claims_Quality_Measure_Client(cms_api_client.CMS_API_Client):
         self.base_url = f"https://data.cms.gov/provider-data/api/1/datastore/query/{self.dataset_id}/0"
         self._record_cache = {}
 
-    def build_cache(self, ccn, limit=100):
+    def build_cache(self, ccn, limit=4):
         """
         Overrides the parent method to collect ALL stacked rows for a vertical dataset.
         Caches the raw list in self._records_cache and saves the parsed, flat 
