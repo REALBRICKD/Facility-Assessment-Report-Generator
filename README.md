@@ -26,7 +26,7 @@ The application is split into three layers:
 
 ## Data Flow Diagram
 
-![Facility Assessment Report Generator data flow](docs/data-flow.png)
+<img width="759" height="925" alt="Screenshot 2026-06-23 153524" src="https://github.com/user-attachments/assets/7e11afea-3051-433f-b343-242d7c5cde87" />
 
 ## Engineering Assumptions
 
