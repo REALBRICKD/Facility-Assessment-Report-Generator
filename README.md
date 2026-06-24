@@ -46,7 +46,7 @@ The application is split into four main modules:
 Some engineering assumptions in this implementation are:
 
 - The CMS dataset contracts are stable: provider fields and claims fields used by the app keep the same names and meanings over time.
-- The national average changes infrequently enough for us to forgo dynamic computation. Should we wish to compute a national average dynamically, a major bottleneck would occur.
+- The national average changes infrequently enough for us to forgo automated, dynamic computation. Should we wish to compute a national average dynamically each time the app is run, a major bottleneck would occur.
 - Users will supply business-context inputs (EMR, patient type, prior coverage/performance, medical coverage) accurately; these are not CMS-derived.
   - For invalid CCN inputs, the application will specify the input format for the user.
   - In the event of other invalid or empty inputs, that cell will be populated by a fallback value such as "N/A"
