@@ -21,7 +21,7 @@ The web application provides a page for the user to enter a valid 6-digit CCN, a
 The technical stack is as follows: 
 - Language: Python
 - UI: Streamlit
-- CMS API Calls: Requests
+- CMS API Calls: Requests API
 - PDF Export: Reportlab
 - Word Export: python-docx
 - Testing: Pytest and Github Actions
