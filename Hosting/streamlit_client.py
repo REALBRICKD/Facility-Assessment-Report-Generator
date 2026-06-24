@@ -166,6 +166,30 @@ def metric_card_html(label, value, sublabel=""):
         </div>
     '''
 
+
+def report_table_html(report_data):
+    """
+    Render the report rows as a white HTML table for consistent webpage styling.
+    """
+    rows = []
+    for row in report_rows(report_data):
+        rows.append(
+            f"<tr><th>{row['Field']}</th><td>{row['Value']}</td></tr>"
+        )
+    return f'''
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(rows)}
+            </tbody>
+        </table>
+    '''
+
 def render_performance_dashboard(report_data):
     """
     Renders the performance dashboard with metrics and claims comparison for state and national values.
@@ -223,7 +247,7 @@ def render_performance_dashboard(report_data):
             st.markdown(metric_card_html("National Avg", display_value(national_value), "Benchmark"), unsafe_allow_html=True)
 
     st.markdown("### Full Performance Snapshot")
-    st.dataframe(report_rows(report_data), use_container_width=True, hide_index=True)
+    st.markdown(report_table_html(report_data), unsafe_allow_html=True)
 
 def run_app():
     """
@@ -260,6 +284,27 @@ def run_app():
                 background-color: #FFFFFF !important;
                 color: #000000 !important;
                 border-color: #B8B8B8 !important;
+            }
+            .stTextInput input:focus,
+            .stNumberInput input:focus,
+            .stTextArea textarea:focus,
+            .stTextInput input:active,
+            .stNumberInput input:active,
+            .stTextArea textarea:active,
+            .stTextInput input:-webkit-autofill,
+            .stTextInput input:-webkit-autofill:hover,
+            .stTextInput input:-webkit-autofill:focus,
+            .stNumberInput input:-webkit-autofill,
+            .stNumberInput input:-webkit-autofill:hover,
+            .stNumberInput input:-webkit-autofill:focus,
+            .stTextArea textarea:-webkit-autofill,
+            .stTextArea textarea:-webkit-autofill:hover,
+            .stTextArea textarea:-webkit-autofill:focus {
+                background-color: #FFFFFF !important;
+                color: #000000 !important;
+                -webkit-text-fill-color: #000000 !important;
+                box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+                caret-color: #000000 !important;
             }
             .stTextInput input::placeholder,
             .stNumberInput input::placeholder,
@@ -325,6 +370,40 @@ def run_app():
             .metric-sublabel {
                 font-size: 0.9rem;
                 color: #666666;
+            }
+            .report-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: #FFFFFF;
+                color: #000000;
+                border: 1px solid #D9D9D9;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+            }
+            .report-table thead th {
+                background: #F5F5F5;
+                color: #111111;
+                text-align: left;
+                font-weight: 700;
+                padding: 0.8rem 0.9rem;
+                border-bottom: 1px solid #D9D9D9;
+            }
+            .report-table tbody th,
+            .report-table tbody td {
+                background: #FFFFFF;
+                color: #000000;
+                padding: 0.75rem 0.9rem;
+                border-bottom: 1px solid #E6E6E6;
+                vertical-align: top;
+            }
+            .report-table tbody th {
+                width: 42%;
+                font-weight: 700;
+            }
+            .report-table tbody tr:last-child th,
+            .report-table tbody tr:last-child td {
+                border-bottom: none;
             }
         </style>
         """,
