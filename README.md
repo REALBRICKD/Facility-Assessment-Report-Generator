@@ -28,11 +28,12 @@ The technical stack is as follows:
 - Testing: Pytest and Github Actions
 ## Core Architectural Design Decisions
 
-The application is split into three main modules:
+The application is split into four main modules:
 
 1. `Hosting/` handles the UI, form validation, session state, and download actions.
 2. `API/` contains the CMS data clients that query and cache remote records.
 3. `FileExport/` renders the final report into DOCX and PDF formats.
+4. `Testing` to house unit tests for the rest of the application.
 
 ## Data Flow Diagram
 
@@ -48,6 +49,7 @@ Some engineering assumptions in this implementation are:
 - Static fallback values are acceptable when CMS values are unavailable.
 - Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
 - All data necessary will be provided from one of the two datasets listed below.
+- Data security measures such as encoding or backups are not required.
 
 ## API Endpoints Queried
 
