@@ -1,9 +1,52 @@
 """
 Wrapper for CMS Claims Quality Measure Dataset API. This class provides methods to fetch and cache provider information based on the CMS Certification Number (CCN).
 """
+from functools import lru_cache
+
 import requests
 
 from API import cms_api_client
+
+CLAIMS_METRICS = {
+    "521": {"prefix": "str_hosp", "label": "Short Term Hospitalization"},
+    "522": {"prefix": "str_ed", "label": "Short Term ED Visit"},
+    "551": {"prefix": "lt_hosp", "label": "Long Term Hospitalization"},
+    "552": {"prefix": "lt_ed", "label": "Long Term ED Visit"},
+}
+
+@lru_cache(maxsize=256)
+def _cached_benchmark_rows(dataset_id, facility_state, measure_codes_key, scope):
+    """
+    Fetches CMS benchmark data for claims-based quality measures and caches the result so repeated calls are faster
+    """
+    base_url = f"https://data.cms.gov/provider-data/api/1/datastore/query/{dataset_id}/0"
+    conditions = [{"property": "measure_code", "value": list(measure_codes_key), "operator": "in"}]
+    if scope == "state" and facility_state:
+        # Query all facilities in the specific state for benchmarking
+        conditions.insert(0, {"property": "state", "value": facility_state, "operator": "="})
+    # scope == "national": No state filter; fetch all facilities globally to compute national average
+
+    all_rows = []
+    offset = 0
+    limit = 1000
+    while True:
+        query_body = {
+            "conditions": conditions,
+            "limit": limit,
+            "offset": offset,
+            "results": True,
+            "count": False,
+            "keys": True,
+            "schema": False,
+        }
+        response = requests.post(base_url, json=query_body, timeout=30)
+        response.raise_for_status()
+        page_rows = response.json().get("results", [])
+        all_rows.extend(page_rows)
+        if len(page_rows) < limit:
+            break
+        offset += limit
+    return tuple((row.get("measure_code"), row.get("adjusted_score")) for row in all_rows)
 
 class CMS_API_Claims_Quality_Measure_Client(cms_api_client.CMS_API_Client):
     def __init__(self, dataset_id):
@@ -18,7 +61,6 @@ class CMS_API_Claims_Quality_Measure_Client(cms_api_client.CMS_API_Client):
         dictionary layout directly to self._record_cache.
         """
         ccn_text = str(ccn).strip()
-        # Mirroring the exact payload structure your parent class expects
         query_body = {
             "conditions": [
                 {"property": "cms_certification_number_ccn", "value": ccn_text, "operator": "="}
@@ -30,43 +72,104 @@ class CMS_API_Claims_Quality_Measure_Client(cms_api_client.CMS_API_Client):
             "keys": True,
             "schema": False,
         }
-        # 1. Fetch using POST just like the parent class
         response = requests.post(self.base_url, json=query_body, timeout=30)
         response.raise_for_status()  
         payload = response.json()
         results = payload.get("results", [])   
-        # 2. Save the full list of raw rows to your list cache
         self._records_cache = results
-        # 3. Flatten the list rows into a single dictionary using our helper
-        self._record_cache = self._parse_vertical_results(results)            
+        facility_state = results[0].get("state") if results else None
+        benchmark_cache = self._build_benchmark_cache(facility_state)
+        self._record_cache = self._parse_vertical_results(results, benchmark_cache)
         return self._record_cache
 
-    def _parse_vertical_results(self, results_list):
+    def _parse_vertical_results(self, results_list, benchmark_cache=None):
         """
         Helper method to iterate through the vertical rows in memory 
         and map them to flat, template-friendly scorecard keys.
         """
-        # Start with standard fallback values for benchmarks so they are never blank
-        parsed_payload = self._get_empty_fallback()
-        # Translation map for the 4 explicit claims measures
-        code_mapping = {
-            "521": "str_hosp",
-            "522": "str_ed",
-            "551": "lt_hosp",
-            "552": "lt_ed"
-        }
+        parsed_payload = benchmark_cache or self._get_empty_fallback()
         for row in results_list:
             m_code = str(row.get("measure_code", ""))
-            if m_code in code_mapping:
-                prefix = code_mapping[m_code]
+            metric = CLAIMS_METRICS.get(m_code)
+            if metric:
+                prefix = metric["prefix"]
                 raw_score = row.get("adjusted_score")
+                if raw_score in (None, ""):
+                    continue
                 if raw_score is not None:
                     try:
-                        # Clean truncation down to two decimal places (e.g., "25.58")
                         parsed_payload[f"{prefix}_score"] = f"{float(raw_score):.2f}"
                     except ValueError:
                         parsed_payload[f"{prefix}_score"] = str(raw_score)
         return parsed_payload
+
+    def _fetch_rows(self, conditions, limit=1000):
+        """
+        Fetch all rows matching the supplied conditions using offset paging.
+        """
+        all_rows = []
+        offset = 0
+        while True:
+            query_body = {
+                "conditions": conditions,
+                "limit": limit,
+                "offset": offset,
+                "results": True,
+                "count": False,
+                "keys": True,
+                "schema": False,
+            }
+            response = requests.post(self.base_url, json=query_body, timeout=30)
+            response.raise_for_status()
+            page_rows = response.json().get("results", [])
+            all_rows.extend(page_rows)
+            if len(page_rows) < limit:
+                break
+            offset += limit
+        return all_rows
+
+    def _rows_to_measure_map(self, cached_rows):
+        """
+        Maps cached rows to a dictionary of measure codes and their corresponding scores.
+        """
+        grouped_scores = {}
+        for measure_code, raw_score in cached_rows:
+            measure_code = str(measure_code or "")
+            if measure_code not in grouped_scores:
+                grouped_scores[measure_code] = []
+            if raw_score in (None, ""):
+                continue
+            try:
+                grouped_scores[measure_code].append(float(raw_score))
+            except ValueError:
+                continue
+
+        averages = {}
+        for measure_code, scores in grouped_scores.items():
+            if scores:
+                averages[measure_code] = f"{sum(scores) / len(scores):.2f}"
+        return averages
+
+    def _build_benchmark_cache(self, facility_state):
+        """
+        Populates a copy of the fallback cache with state averages for each measure code.
+        """
+        benchmark_cache = self._get_empty_fallback()
+        measure_codes = tuple(CLAIMS_METRICS.keys())
+        
+        # Query only the facility's state for state benchmarks
+        state_averages = self._rows_to_measure_map(
+            _cached_benchmark_rows(self.dataset_id, facility_state, measure_codes, "state")
+        ) if facility_state else {}
+
+        for measure_code, metric in CLAIMS_METRICS.items():
+            prefix = metric["prefix"]
+            state_avg = state_averages.get(measure_code)
+
+            if state_avg is not None:
+                benchmark_cache[f"{prefix}_state_avg"] = state_avg
+            # National averages use fallback defaults
+        return benchmark_cache
 
     def _get_empty_fallback(self):
         """

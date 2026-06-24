@@ -134,3 +134,91 @@ def test_cms_api_client_build_cache_monkeypatched(monkeypatch):
     client = cms_api_client.CMS_API_Client("d")
     client.build_cache("123456", limit=1)
     assert client._record_cache.get("provider_name") == "X"
+
+
+def test_claims_build_cache_computes_state_benchmarks(monkeypatch):
+    from API import cms_api_claims_quality_measure as claims_mod_local
+
+    class DummyResp:
+        def __init__(self, results):
+            self._results = results
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"results": self._results}
+
+    facility_rows = [
+        {"measure_code": "521", "adjusted_score": "28.910176", "state": "OH"},
+        {"measure_code": "522", "adjusted_score": "11.824824", "state": "OH"},
+        {"measure_code": "551", "adjusted_score": "", "state": "OH"},
+        {"measure_code": "552", "adjusted_score": "", "state": "OH"},
+    ]
+
+    state_rows = {
+        "521": [
+            {"measure_code": "521", "adjusted_score": "10", "state": "OH"},
+            {"measure_code": "521", "adjusted_score": "14", "state": "OH"},
+        ],
+        "522": [
+            {"measure_code": "522", "adjusted_score": "8", "state": "OH"},
+            {"measure_code": "522", "adjusted_score": "12", "state": "OH"},
+        ],
+        "551": [
+            {"measure_code": "551", "adjusted_score": "1", "state": "OH"},
+            {"measure_code": "551", "adjusted_score": "3", "state": "OH"},
+        ],
+        "552": [
+            {"measure_code": "552", "adjusted_score": "0.5", "state": "OH"},
+            {"measure_code": "552", "adjusted_score": "1.5", "state": "OH"},
+        ],
+    }
+
+    national_rows = {
+        "521": [
+            {"measure_code": "521", "adjusted_score": "10", "state": "OH"},
+            {"measure_code": "521", "adjusted_score": "14", "state": "FL"},
+            {"measure_code": "521", "adjusted_score": "18", "state": "TX"},
+        ],
+        "522": [
+            {"measure_code": "522", "adjusted_score": "8", "state": "OH"},
+            {"measure_code": "522", "adjusted_score": "12", "state": "FL"},
+            {"measure_code": "522", "adjusted_score": "16", "state": "TX"},
+        ],
+        "551": [
+            {"measure_code": "551", "adjusted_score": "1", "state": "OH"},
+            {"measure_code": "551", "adjusted_score": "3", "state": "FL"},
+            {"measure_code": "551", "adjusted_score": "5", "state": "TX"},
+        ],
+        "552": [
+            {"measure_code": "552", "adjusted_score": "0.5", "state": "OH"},
+            {"measure_code": "552", "adjusted_score": "1.5", "state": "FL"},
+            {"measure_code": "552", "adjusted_score": "2.5", "state": "TX"},
+        ],
+    }
+
+    def fake_post(url, json, timeout):
+        conditions = json["conditions"]
+        facility_ccn = next((c["value"] for c in conditions if c["property"] == "cms_certification_number_ccn"), None)
+        state = next((c["value"] for c in conditions if c["property"] == "state"), None)
+        measure_code_condition = next((c["value"] for c in conditions if c["property"] == "measure_code"), None)
+
+        if facility_ccn == "725000":
+            return DummyResp(facility_rows)
+        if state == "OH" and measure_code_condition:
+            return DummyResp(state_rows["521"] + state_rows["522"] + state_rows["551"] + state_rows["552"])
+        if measure_code_condition:
+            return DummyResp(national_rows["521"] + national_rows["522"] + national_rows["551"] + national_rows["552"])
+
+        return DummyResp([])
+
+    monkeypatch.setattr("requests.post", fake_post)
+    client = claims_mod_local.CMS_API_Claims_Quality_Measure_Client("dummy")
+    client.build_cache("725000", limit=4)
+
+    assert client.get_str_hosp_score_from_cache() == "28.91"
+    assert client.get_lt_hosp_score_from_cache() == "N/A"
+    assert client.get_str_hosp_state_avg_from_cache() == "12.00"
+    assert client.get_lt_hosp_state_avg_from_cache() == "2.00"
+    assert client.get_lt_ed_state_avg_from_cache() == "1.00"
