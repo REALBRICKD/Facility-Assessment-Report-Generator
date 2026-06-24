@@ -2,6 +2,8 @@
 
 ## Overview
 
+<img width="1072" height="925" alt="image" src="https://github.com/user-attachments/assets/390bb608-7cfd-4dab-972b-14d0dd9d7612" />
+
 This is a Python/Streamlit application for building a facility-level assessment snapshot from CMS datasets and a small set of optional manual inputs. The app looks up a nursing facility by CCN, pulls provider profile data and claims-based quality measures from CMS datasets, then assembles a formatted report that can be reviewed in the browser or exported as Word and PDF documents.
 
 The web application provides a page for the user to enter a valid 6-digit CCN, add contextual fields such as EMR, current census, patient type, and MedElite history, then fetch the report. It stores the resulting report in the Streamlit session state so the user can review the dashboard and download the generated files without repeating the lookup.
