@@ -51,7 +51,7 @@ Some engineering assumptions in this implementation are:
   - For invalid CCN inputs, the application will specify the input format for the user.
   - In the event of other invalid or empty inputs, that cell will be populated by a fallback value such as "N/A"
 - Plaintext will suffice for a branding banner. Were that not the case, appending the logo as an image and using custom fonts/color schemes would be the next step of app implementation.
-- Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
+- Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports.
 - All data required by the application will be found in:
   - CMS Provider Info Dataset
   - CMS Claims Quality Measure Dataset
