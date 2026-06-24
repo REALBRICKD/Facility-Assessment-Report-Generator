@@ -10,12 +10,12 @@ The web application provides a page for the user to enter a valid 6-digit CCN, a
 
 ### How To Use The Application
 
-1. Open the following link: https://facility-assessment-report-generator-070i.onrender.com/
+1. Open the following link: [https://facility-assessment-report-generator-070i.onrender.com/](https://facility-assessment-report-generator-070i.onrender.com/)
 2. Enter a 6-digit CCN.
 3. Optionally override the facility name.
 4. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
 5. Select **Fetch Facility Data**.
-6. Over the course of a few seconds, the application will build the .pdf and .docx files and provide download buttons.
+6. Over the course of a few seconds, the application will build the .pdf and .docx files and provide download buttons. (See the Notes section for more details)
 7. Review the performance dashboard and download the generated PDF or Word report.
 
 ## Tech Stack & Override Logic
@@ -86,7 +86,7 @@ We will need manual input for:
 
 ### 1. Prerequisites
 
-- Python 3.10 or newer
+- Python 3.14 or newer
 - Internet access to query CMS data endpoints
 - Windows, macOS, or Linux with a terminal
 
@@ -136,3 +136,4 @@ Unit tests are run automatically upon commit, though they have been provided in 
 
 - `main.py` is only a thin entry point; all application logic starts in `Hosting/streamlit_client.py`.
 - The app uses the official legal name from the CMS API by default. However, if the user enters a custom name, it will override the official legal name on the final output.
+- Due to Render's limitations, the app may take a few seconds to start - this is expected.
