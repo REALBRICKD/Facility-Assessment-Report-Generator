@@ -33,7 +33,7 @@ The application is split into four main modules:
 1. `Hosting/` handles the UI, form validation, session state, and download actions.
 2. `API/` contains the CMS data clients that query and cache remote records.
 3. `FileExport/` renders the final report into DOCX and PDF formats.
-4. `Testing` to house unit tests for the rest of the application.
+4. `Testing/` to house unit tests for the rest of the application.
 
 ## Data Flow Diagram
 
