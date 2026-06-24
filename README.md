@@ -15,7 +15,8 @@ The web application provides a page for the user to enter a valid 6-digit CCN, a
 2. Optionally override the facility name.
 3. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
 4. Select **Fetch Facility Data**.
-5. Review the performance dashboard and download the generated PDF or Word report.
+5. Over the course of a few seconds, the application will build the .pdf and .docx files and provide download buttons.
+6. Review the performance dashboard and download the generated PDF or Word report.
 
 ## Tech Stack & Override Logic
 
