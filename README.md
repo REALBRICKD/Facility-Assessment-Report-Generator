@@ -120,6 +120,14 @@ streamlit run Hosting/streamlit_client.py
 ### 5. Testing
 Unit tests are run automatically upon commit, though they have been provided in the `Testing\` module. 
 
+- test_file_export_api.py validates:
+  - Cache is built correctly
+  - Empty/invalid inputs are given correct fallback values
+- test_streamlit_client.py validates:
+  - Correct structure and contents of exported report
+  - Normalization of inputs
+  - Proper construction of addresses
+
 ## Notes
 
 - `main.py` is only a thin entry point; all application logic starts in `Hosting/streamlit_client.py`.
