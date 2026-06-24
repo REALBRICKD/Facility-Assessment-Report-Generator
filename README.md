@@ -122,15 +122,16 @@ Unit tests are run automatically upon commit, though they have been provided in 
 
 - test_file_export_api.py validates:
   - Data is retrieved correctly from CMS Provider Info and Claims Quality Measure APIs
+  - Data from datasets and user input are merged and processed properly for the generated report
   - Empty/invalid inputs are given correct fallback values
 - test_streamlit_client.py validates:
-  - Correct structure and contents of exported report
-  - Normalization of inputs
-  - Proper construction of addresses
+  - Correct structure of exported report
+  - Normalization of manual user inputs
+  - Proper construction of facility addresses
 
 ## Notes
 
 - `main.py` is only a thin entry point; all application logic starts in `Hosting/streamlit_client.py`.
 - If you change the report schema in the API layer, update both export modules so the DOCX and PDF output stay in sync with the dashboard.
 - If ReportLab is unavailable in a local environment, install the dependencies from `requirements.txt` before trying to use PDF export.
-- The app uses the legal name provided by the API for any given facility (if found) by default, or if the input value is just white space. When an override value is provided, the trimmed value is used instead. 
+- The app uses the official legal name from the CMS API by default. However, if the user enters a custom name, it will override the official legal name on the final output.
