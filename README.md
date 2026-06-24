@@ -1,8 +1,5 @@
 # Facility Assessment Report Generator
 
-## Web App Link
-https://facility-assessment-report-generator-070i.onrender.com/
-
 ## Overview
 
 This is a Python/Streamlit application for building a facility-level assessment snapshot from CMS datasets and a small set of optional manual inputs. The app looks up a nursing facility by CCN, pulls provider profile data and claims-based quality measures from CMS datasets, then assembles a formatted report that can be reviewed in the browser or exported as Word and PDF documents.
@@ -11,12 +8,13 @@ The web application provides a page for the user to enter a valid 6-digit CCN, a
 
 ### How To Use The Application
 
-1. Enter a 6-digit CCN.
-2. Optionally override the facility name.
-3. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
-4. Select **Fetch Facility Data**.
-5. Over the course of a few seconds, the application will build the .pdf and .docx files and provide download buttons.
-6. Review the performance dashboard and download the generated PDF or Word report.
+1. Open the following link: https://facility-assessment-report-generator-070i.onrender.com/
+2. Enter a 6-digit CCN.
+3. Optionally override the facility name.
+4. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
+5. Select **Fetch Facility Data**.
+6. Over the course of a few seconds, the application will build the .pdf and .docx files and provide download buttons.
+7. Review the performance dashboard and download the generated PDF or Word report.
 
 ## Tech Stack & Override Logic
 
