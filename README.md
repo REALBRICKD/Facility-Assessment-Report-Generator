@@ -24,10 +24,12 @@ The technical stack is as follows:
 - Language: Python
 - UI/Data Cards: Streamlit
 - CMS API Calls: Requests API
-- PDF Export: Reportlab
+- PDF Export: reportlab
 - Word Export: python-docx
 - Testing: Pytest and Github Actions
 - Hosting: Render
+
+The user interface provides an optional text input field letting users manually override a facility's legal name on the final documents. To maintain visual formatting while protecting against blank values or data corruption, the application strips any input given. If it is valid, it will be applied over the official legal name supplied by the CMS API. If not, the application will default to the CMS-supplied name.
 ## Core Architectural Design Decisions
 
 The application is split into four main modules:
@@ -60,9 +62,9 @@ Some engineering assumptions in this implementation are:
 
 ## API Endpoints Queried
 
-We will have to query the CMS Provider Info dataset (https://data.cms.gov/provider-data/dataset/4pq5-n9py) for the following features:
-- Location (provider_name)
-- Name of Facility (provider_address)
+We will query the CMS Provider Info dataset (https://data.cms.gov/provider-data/dataset/4pq5-n9py) for the following features:
+- Location (provider_address)
+- Name of Facility (provider_name)
 - Census Capacity (number_of_certified_beds)
 - Overall Star Rating (overall_rating)
 - Health Inspection Rating (health_inspection_rating)
