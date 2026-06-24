@@ -1,8 +1,5 @@
 # Facility Assessment Report Generator
 
-## Web App Link
-https://facility-assessment-report-generator-070i.onrender.com/
-
 ## Overview
 
 This is a Python/Streamlit application for building a facility-level assessment snapshot from CMS datasets and a small set of optional manual inputs. The app looks up a nursing facility by CCN, pulls provider profile data and claims-based quality measures from CMS datasets, then assembles a formatted report that can be reviewed in the browser or exported as Word and PDF documents.
@@ -11,28 +8,31 @@ The web application provides a page for the user to enter a valid 6-digit CCN, a
 
 ### How To Use The Application
 
-1. Enter a 6-digit CCN.
-2. Optionally override the facility name.
-3. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
-4. Select **Fetch Facility Data**.
-5. Review the performance dashboard and download the generated PDF or Word report.
+1. Open the following link: https://facility-assessment-report-generator-070i.onrender.com/
+2. Enter a 6-digit CCN.
+3. Optionally override the facility name.
+4. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
+5. Select **Fetch Facility Data**.
+6. Over the course of a few seconds, the application will build the .pdf and .docx files and provide download buttons.
+7. Review the performance dashboard and download the generated PDF or Word report.
 
 ## Tech Stack & Override Logic
 
 The technical stack is as follows: 
 - Language: Python
 - UI: Streamlit
-- CMS API Calls: Requests
+- CMS API Calls: Requests API
 - PDF Export: Reportlab
 - Word Export: python-docx
 - Testing: Pytest and Github Actions
 ## Core Architectural Design Decisions
 
-The application is split into three main modules:
+The application is split into four main modules:
 
 1. `Hosting/` handles the UI, form validation, session state, and download actions.
 2. `API/` contains the CMS data clients that query and cache remote records.
 3. `FileExport/` renders the final report into DOCX and PDF formats.
+4. `Testing/` to house unit tests for the rest of the application.
 
 ## Data Flow Diagram
 
@@ -44,20 +44,25 @@ Some engineering assumptions in this implementation are:
 
 - The CMS dataset contracts are stable: provider fields and claims fields used by the app keep the same names and meanings over time.
 - Users will supply business-context inputs (EMR, patient type, prior coverage/performance, medical coverage) accurately; these are not CMS-derived.
-- Plaintext will suffice for company branding. Were that not the case, appending the logo as an image and using custom fonts/color schemes may be necessary.
-- Static fallback values are acceptable when CMS values are unavailable.
+  - For invalid CCN inputs, the application will specify the input format for the user.
+  - In the event of other invalid or empty inputs, that cell will be populated by a fallback value such as "N/A"
+- Plaintext will suffice for a branding banner. Were that not the case, appending the logo as an image and using custom fonts/color schemes would be the next step of app implementation.
 - Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
-- All data necessary will be provided from one of the two datasets listed below.
+- All data required by the application will be found in:
+  - CMS Provider Info Dataset
+  - CMS Claims Quality Measure Dataset
+  - Manual user input through the webpage
+- Data security measures such as encoding or backups are not required for an initial implementation.
 
 ## API Endpoints Queried
 
 We will have to query the CMS Provider Info dataset (https://data.cms.gov/provider-data/dataset/4pq5-n9py) for the following features:
-- location (provider_name)
-- name of facility (provider_address)
-- census capacity (number_of_certified_beds)
-- overall star rating (overall_rating)
-- Health Inspection (health_inspection_rating)
-- Staffing (staffing_rating)
+- Location (provider_name)
+- Name of Facility (provider_address)
+- Census Capacity (number_of_certified_beds)
+- Overall Star Rating (overall_rating)
+- Health Inspection Rating (health_inspection_rating)
+- Staffing Rating (staffing_rating)
 - Quality of Resident Care (qm_rating)
 
 For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims Quality Measure dataset (https://data.cms.gov/provider-data/dataset/ijh5-nb2v):
@@ -68,13 +73,13 @@ For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims
 
 We will need manual input for:
 - EMR
-- current census
-- type of patient
-- medelite history (previous coverage from medelite)
-- medical coverage
+- Current Census
+- Type of Patient
+- Medelite History (Previous Coverage from medelite)
+- Medical Coverage
 - Previous Provider Performance from Medelite
 
-## Quick-Start Local Installation Guide
+## Quick-Start Local Development Guide
 
 ### 1. Prerequisites
 
@@ -112,9 +117,19 @@ The project depends on `streamlit`, `requests`, `python-docx`, and `reportlab`.
 streamlit run Hosting/streamlit_client.py
 ```
 
+### 5. Testing
+Unit tests are run automatically upon commit, though they have been provided in the `Testing\` module. 
+
+- test_file_export_api.py validates:
+  - Data is retrieved correctly from CMS Provider Info and Claims Quality Measure APIs
+  - Data from datasets are merged and processed properly for the generated report
+  - Empty/invalid inputs are given correct fallback values
+- test_streamlit_client.py validates:
+  - Correct structure of exported report
+  - Normalization of manual user inputs
+  - Proper construction of facility addresses
+
 ## Notes
 
 - `main.py` is only a thin entry point; all application logic starts in `Hosting/streamlit_client.py`.
-- If you change the report schema in the API layer, update both export modules so the DOCX and PDF output stay in sync with the dashboard.
-- If ReportLab is unavailable in a local environment, install the dependencies from `requirements.txt` before trying to use PDF export.
-- The app uses the legal name provided by the API for any given facility (if found) by default, or if the input value is just white space. When an override value is provided, the trimmed value is used instead. 
+- The app uses the official legal name from the CMS API by default. However, if the user enters a custom name, it will override the official legal name on the final output.
