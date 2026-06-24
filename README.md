@@ -9,36 +9,13 @@ This is a Python/Streamlit application for building a facility-level assessment 
 
 The web application provides a page for the user to enter a valid 6-digit CCN, add contextual fields such as EMR, current census, patient type, and MedElite history, then fetch the report. It stores the resulting report in the Streamlit session state so the user can review the dashboard and download the generated files without repeating the lookup.
 
-## Core Architectural Design Decisions
+### How To Use The Application
 
-The application is split into three layers:
-
-1. `Hosting/streamlit_client.py` handles the UI, form validation, session state, and download actions.
-2. `API/` contains the CMS data clients that query and cache remote records.
-3. `FileExport/` renders the final report into DOCX and PDF formats.
-
-- CMS data is fetched by CCN and cached in memory so the app can render the full report from one lookup cycle.
-- Provider metadata comes from the CMS Nursing Home Provider dataset (`4pq5-n9py`), which supplies the facility name, address, city, state, bed count, and star ratings.
-- Claims quality measures come from the CMS claims dataset (`ijh5-nb2v`), which is flattened into a report-friendly schema for short-term and long-term hospitalization and ED visit measures.
-- The Streamlit form validates the CCN as a 6-digit numeric value and normalizes the current census as a whole number before any CMS request is made.
-- The report uses a shared data structure for on-screen display and export generation, which keeps the dashboard, DOCX output, and PDF output aligned.
-- The UI applies custom CSS to keep the interface branded, hide Streamlit chrome, and present the key metrics as cards instead of a plain form-only workflow.
-
-## Data Flow Diagram
-
-![Facility Assessment Report Generator data flow](docs/data-flow.png)
-
-## Engineering Assumptions
-
-Some engineering assumptions in this implementation are:
-
-- The CMS dataset contracts are stable: provider fields and claims fields used by the app keep the same names and meanings over time.
-- A valid 6-digit CCN is enough to identify a single provider record for report generation (provider lookup uses `limit=1`).
-- Claims measures are represented by a known, fixed set of measure codes (`521`, `522`, `551`, `552`) that map to the scorecard fields.
-- Static fallback benchmark values for state and national averages are acceptable when CMS values are unavailable.
-- Data freshness can trade off against speed: Streamlit caching with a 1-hour TTL is considered sufficient for this workflow.
-- Users will supply business-context inputs (EMR, patient type, prior coverage/performance, medical coverage) accurately; these are not CMS-derived.
-- Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
+1. Enter a 6-digit CCN.
+2. Optionally override the facility name.
+3. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
+4. Select **Fetch Facility Data**.
+5. Review the performance dashboard and download the generated PDF or Word report.
 
 ## Tech Stack & Override Logic
 
@@ -48,13 +25,33 @@ The technical stack is as follows:
 - CMS API Calls: Requests
 - PDF Export: Reportlab
 - Word Export: python-docx
+- Testing: Pytest and Github Actions
+## Core Architectural Design Decisions
 
-The app uses the legal name provided by the API for any given facility (if found) by default, or if the input value is just white space. When an override value is provided, the trimmed value is used instead. 
+The application is split into three main modules:
+
+1. `Hosting/` handles the UI, form validation, session state, and download actions.
+2. `API/` contains the CMS data clients that query and cache remote records.
+3. `FileExport/` renders the final report into DOCX and PDF formats.
+
+## Data Flow Diagram
+
+<img width="759" height="925" alt="Screenshot 2026-06-23 153524" src="https://github.com/user-attachments/assets/7e11afea-3051-433f-b343-242d7c5cde87" />
+
+## Engineering Assumptions
+
+Some engineering assumptions in this implementation are:
+
+- The CMS dataset contracts are stable: provider fields and claims fields used by the app keep the same names and meanings over time.
+- Users will supply business-context inputs (EMR, patient type, prior coverage/performance, medical coverage) accurately; these are not CMS-derived.
+- Plaintext will suffice for company branding. Were that not the case, appending the logo as an image and using custom fonts/color schemes may be necessary.
+- Static fallback values are acceptable when CMS values are unavailable.
+- Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
+- All data necessary will be provided from one of the two datasets listed below.
 
 ## API Endpoints Queried
 
-We will have to query this dataset for the following features:
-https://data.cms.gov/provider-data/dataset/4pq5-n9py
+We will have to query the CMS Provider Info dataset (https://data.cms.gov/provider-data/dataset/4pq5-n9py) for the following features:
 - location (provider_name)
 - name of facility (provider_address)
 - census capacity (number_of_certified_beds)
@@ -63,6 +60,12 @@ https://data.cms.gov/provider-data/dataset/4pq5-n9py
 - Staffing (staffing_rating)
 - Quality of Resident Care (qm_rating)
 
+For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims Quality Measure dataset (https://data.cms.gov/provider-data/dataset/ijh5-nb2v):
+- "521": for short-term hospitalization metrics
+- "522": for short-term ED metrics
+- "551": for long-term hospitalization metrics
+- "552": for long-term ED metrics
+
 We will need manual input for:
 - EMR
 - current census
@@ -70,13 +73,6 @@ We will need manual input for:
 - medelite history (previous coverage from medelite)
 - medical coverage
 - Previous Provider Performance from Medelite
-
-For the Hospitalization/ED metrics, we query by measure_code from this dataset:
-https://data.cms.gov/provider-data/dataset/ijh5-nb2v
-- "521": for short-term hospitalization metrics
-- "522": for short-term ED metrics
-- "551": for long-term hospitalization metrics
-- "552": for long-term ED metrics
 
 ## Quick-Start Local Installation Guide
 
@@ -116,21 +112,9 @@ The project depends on `streamlit`, `requests`, `python-docx`, and `reportlab`.
 streamlit run Hosting/streamlit_client.py
 ```
 
-### 5. Use the application
-
-1. Enter a 6-digit CCN.
-2. Optionally override the facility name.
-3. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
-4. Select **Fetch Facility Data**.
-5. Review the performance dashboard and download the generated PDF or Word report.
-
-## Data Sources
-
-- CMS Nursing Home Provider dataset: `https://data.cms.gov/provider-data/dataset/4pq5-n9py`
-- CMS claims quality measure dataset: `https://data.cms.gov/provider-data/dataset/ijh5-nb2v`
-
 ## Notes
 
 - `main.py` is only a thin entry point; all application logic starts in `Hosting/streamlit_client.py`.
 - If you change the report schema in the API layer, update both export modules so the DOCX and PDF output stay in sync with the dashboard.
 - If ReportLab is unavailable in a local environment, install the dependencies from `requirements.txt` before trying to use PDF export.
+- The app uses the legal name provided by the API for any given facility (if found) by default, or if the input value is just white space. When an override value is provided, the trimmed value is used instead. 
