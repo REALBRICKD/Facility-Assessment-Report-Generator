@@ -44,7 +44,8 @@ Some engineering assumptions in this implementation are:
 
 - The CMS dataset contracts are stable: provider fields and claims fields used by the app keep the same names and meanings over time.
 - Users will supply business-context inputs (EMR, patient type, prior coverage/performance, medical coverage) accurately; these are not CMS-derived.
-  - For invalid CCN inputs, the application will specify the input format for the user. In the event of other invalid or empty inputs, that cell will be populated by a fallback value such as "N/A"
+  - For invalid CCN inputs, the application will specify the input format for the user.
+  - In the event of other invalid or empty inputs, that cell will be populated by a fallback value such as "N/A"
 - Plaintext will suffice for company branding. Were that not the case, appending the logo as an image and using custom fonts/color schemes may be necessary.
 - Static fallback values are acceptable when CMS values are unavailable.
 - Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
