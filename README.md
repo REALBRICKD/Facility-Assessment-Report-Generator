@@ -10,7 +10,7 @@ The web application provides a page for the user to enter a valid 6-digit CCN, a
 
 ### How To Use The Application
 
-1. Open the following link: https://facility-assessment-report-generator-070i.onrender.com/
+1. Open the following link: [https://facility-assessment-report-generator-070i.onrender.com/](https://facility-assessment-report-generator-070i.onrender.com/)
 2. Enter a 6-digit CCN.
 3. Optionally override the facility name.
 4. Fill in the manual fields for EMR, current census, patient type, previous coverage, previous provider performance, and medical coverage.
