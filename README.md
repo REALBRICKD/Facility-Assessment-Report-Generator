@@ -86,7 +86,7 @@ We will need manual input for:
 
 ### 1. Prerequisites
 
-- Python 3.10 or newer
+- Python 3.14 or newer
 - Internet access to query CMS data endpoints
 - Windows, macOS, or Linux with a terminal
 
