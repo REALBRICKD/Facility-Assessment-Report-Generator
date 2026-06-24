@@ -57,12 +57,12 @@ Some engineering assumptions in this implementation are:
 ## API Endpoints Queried
 
 We will have to query the CMS Provider Info dataset (https://data.cms.gov/provider-data/dataset/4pq5-n9py) for the following features:
-- location (provider_name)
-- name of facility (provider_address)
-- census capacity (number_of_certified_beds)
-- overall star rating (overall_rating)
-- Health Inspection (health_inspection_rating)
-- Staffing (staffing_rating)
+- Location (provider_name)
+- Name of Facility (provider_address)
+- Census Capacity (number_of_certified_beds)
+- Overall Star Rating (overall_rating)
+- Health Inspection Rating (health_inspection_rating)
+- Staffing Rating (staffing_rating)
 - Quality of Resident Care (qm_rating)
 
 For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims Quality Measure dataset (https://data.cms.gov/provider-data/dataset/ijh5-nb2v):
@@ -73,10 +73,10 @@ For the Hospitalization/ED metrics, we query by measure_code from the CMS Claims
 
 We will need manual input for:
 - EMR
-- current census
-- type of patient
-- medelite history (previous coverage from medelite)
-- medical coverage
+- Current Census
+- Type of Patient
+- Medelite History (Previous Coverage from medelite)
+- Medical Coverage
 - Previous Provider Performance from Medelite
 
 ## Quick-Start Local Development Guide
@@ -122,7 +122,7 @@ Unit tests are run automatically upon commit, though they have been provided in 
 
 - test_file_export_api.py validates:
   - Data is retrieved correctly from CMS Provider Info and Claims Quality Measure APIs
-  - Data from datasets and user input are merged and processed properly for the generated report
+  - Data from datasets are merged and processed properly for the generated report
   - Empty/invalid inputs are given correct fallback values
 - test_streamlit_client.py validates:
   - Correct structure of exported report
@@ -132,6 +132,4 @@ Unit tests are run automatically upon commit, though they have been provided in 
 ## Notes
 
 - `main.py` is only a thin entry point; all application logic starts in `Hosting/streamlit_client.py`.
-- If you change the report schema in the API layer, update both export modules so the DOCX and PDF output stay in sync with the dashboard.
-- If ReportLab is unavailable in a local environment, install the dependencies from `requirements.txt` before trying to use PDF export.
 - The app uses the official legal name from the CMS API by default. However, if the user enters a custom name, it will override the official legal name on the final output.
