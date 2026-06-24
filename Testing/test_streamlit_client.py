@@ -1,3 +1,7 @@
+"""
+Tests for Hosting.streamlit_client module.
+"""
+
 import sys
 import types
 import pytest
