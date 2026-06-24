@@ -5,6 +5,8 @@ from io import BytesIO
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import Inches, Pt
 
 def _display_value(value, fallback="N/A"):
@@ -44,6 +46,35 @@ def _build_rows(report_data):
         ("LT ED Visits State Avg.", claims.get("lt_ed_state_avg")),
     ]
 
+
+def _add_hyperlink(paragraph, url, text):
+    part = paragraph.part
+    r_id = part.relate_to(url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink", is_external=True)
+
+    hyperlink = OxmlElement("w:hyperlink")
+    hyperlink.set(qn("r:id"), r_id)
+
+    new_run = OxmlElement("w:r")
+    r_pr = OxmlElement("w:rPr")
+
+    color = OxmlElement("w:color")
+    color.set(qn("w:val"), "0563C1")
+    r_pr.append(color)
+
+    underline = OxmlElement("w:u")
+    underline.set(qn("w:val"), "single")
+    r_pr.append(underline)
+
+    new_run.append(r_pr)
+
+    text_element = OxmlElement("w:t")
+    text_element.text = text
+    new_run.append(text_element)
+
+    hyperlink.append(new_run)
+    paragraph._p.append(hyperlink)
+    return hyperlink
+
 def build_docx_export(report_data):
     """
     builds document in buffer and returns it as a byte stream
@@ -60,21 +91,28 @@ def build_docx_export(report_data):
     title_run = title.add_run("INFINITE — Managed by MEDELITE")
     title_run.bold = True
     title_run.font.size = Pt(18)
-    title_run.font.name = "Helvetica"
+    title_run.font.name = "Helvetica-Bold"
 
     subtitle = document.add_paragraph()
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     subtitle_run = subtitle.add_run("FACILITY ASSESSMENT SNAPSHOT")
     subtitle_run.bold = True
     subtitle_run.font.size = Pt(14)
-    subtitle_run.font.name = "Helvetica"
+    subtitle_run.font.name = "Helvetica-Bold"
 
     state_paragraph = document.add_paragraph()
     state_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     state_run = state_paragraph.add_run(_display_value(report_data.get("state")))
     state_run.bold = True
     state_run.font.size = Pt(12)
-    state_run.font.name = "Helvetica"
+    state_run.font.name = "Helvetica-Bold"
+
+    ccn = _display_value(report_data.get("ccn"), fallback="")
+    care_compare_url = f"https://www.medicare.gov/care-compare/details/nursing-home/{ccn}"
+    link_paragraph = document.add_paragraph()
+    link_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    link_paragraph.add_run("Official Medicare Care Compare profile: ")
+    _add_hyperlink(link_paragraph, care_compare_url, care_compare_url)
 
     table = document.add_table(rows=1, cols=2)
     table.style = "Table Grid"
