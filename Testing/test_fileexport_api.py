@@ -2,6 +2,9 @@
 Tests for file export API clients and CMS API client.
 """
 
+import io
+import zipfile
+import xml.etree.ElementTree as ET
 import types
 import pytest
 
@@ -48,6 +51,32 @@ def test_build_docx_export_returns_bytes():
     b = docx_client.build_docx_export(data)
     assert isinstance(b, (bytes, bytearray))
     assert len(b) > 0
+
+
+def test_build_docx_export_includes_care_compare_hyperlink():
+    data = make_minimal_report()
+    b = docx_client.build_docx_export(data)
+
+    with zipfile.ZipFile(io.BytesIO(b)) as docx_package:
+        relationships = ET.fromstring(docx_package.read("word/_rels/document.xml.rels"))
+
+    targets = [
+        rel.attrib["Target"]
+        for rel in relationships
+        if rel.attrib.get("Type") == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"
+    ]
+
+    assert "https://www.medicare.gov/care-compare/details/nursing-home/123456" in targets
+
+
+def test_build_docx_export_uses_helvetica_font():
+    data = make_minimal_report()
+    b = docx_client.build_docx_export(data)
+
+    with zipfile.ZipFile(io.BytesIO(b)) as docx_package:
+        document_xml = docx_package.read("word/document.xml")
+
+    assert b"Helvetica" in document_xml
 
 
 def test_build_pdf_export_returns_bytes():

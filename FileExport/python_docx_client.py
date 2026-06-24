@@ -7,12 +7,27 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt
+from docx.shared import Inches, Pt, RGBColor
 
 def _display_value(value, fallback="N/A"):
     if value in (None, ""):
         return fallback
     return str(value)
+
+def _set_run_font(run, font_name):
+    run.font.name = font_name
+    r_pr = run._element.get_or_add_rPr()
+    r_fonts = r_pr.rFonts
+    if r_fonts is None:
+        r_fonts = OxmlElement("w:rFonts")
+        r_pr.append(r_fonts)
+    r_fonts.set(qn("w:ascii"), font_name)
+    r_fonts.set(qn("w:hAnsi"), font_name)
+    r_fonts.set(qn("w:cs"), font_name)
+    r_fonts.set(qn("w:eastAsia"), font_name)
+
+def _set_run_color(run, rgb_hex):
+    run.font.color.rgb = RGBColor.from_string(rgb_hex)
 
 def _build_rows(report_data):
     claims = report_data["claims_summary"]
@@ -46,7 +61,6 @@ def _build_rows(report_data):
         ("LT ED Visits State Avg.", claims.get("lt_ed_state_avg")),
     ]
 
-
 def _add_hyperlink(paragraph, url, text):
     part = paragraph.part
     r_id = part.relate_to(url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink", is_external=True)
@@ -60,6 +74,13 @@ def _add_hyperlink(paragraph, url, text):
     color = OxmlElement("w:color")
     color.set(qn("w:val"), "0563C1")
     r_pr.append(color)
+
+    r_fonts = OxmlElement("w:rFonts")
+    r_fonts.set(qn("w:ascii"), "Helvetica")
+    r_fonts.set(qn("w:hAnsi"), "Helvetica")
+    r_fonts.set(qn("w:cs"), "Helvetica")
+    r_fonts.set(qn("w:eastAsia"), "Helvetica")
+    r_pr.append(r_fonts)
 
     underline = OxmlElement("w:u")
     underline.set(qn("w:val"), "single")
@@ -91,27 +112,29 @@ def build_docx_export(report_data):
     title_run = title.add_run("INFINITE — Managed by MEDELITE")
     title_run.bold = True
     title_run.font.size = Pt(18)
-    title_run.font.name = "Helvetica-Bold"
+    _set_run_font(title_run, "Helvetica")
 
     subtitle = document.add_paragraph()
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     subtitle_run = subtitle.add_run("FACILITY ASSESSMENT SNAPSHOT")
     subtitle_run.bold = True
     subtitle_run.font.size = Pt(14)
-    subtitle_run.font.name = "Helvetica-Bold"
+    _set_run_font(subtitle_run, "Helvetica")
 
     state_paragraph = document.add_paragraph()
     state_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     state_run = state_paragraph.add_run(_display_value(report_data.get("state")))
     state_run.bold = True
     state_run.font.size = Pt(12)
-    state_run.font.name = "Helvetica-Bold"
+    _set_run_font(state_run, "Helvetica")
 
     ccn = _display_value(report_data.get("ccn"), fallback="")
     care_compare_url = f"https://www.medicare.gov/care-compare/details/nursing-home/{ccn}"
     link_paragraph = document.add_paragraph()
     link_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    link_paragraph.add_run("Official Medicare Care Compare profile: ")
+    link_run = link_paragraph.add_run("Official Medicare Care Compare profile: ")
+    _set_run_font(link_run, "Helvetica")
+    _set_run_color(link_run, "000000")
     _add_hyperlink(link_paragraph, care_compare_url, care_compare_url)
 
     table = document.add_table(rows=1, cols=2)
@@ -124,11 +147,16 @@ def build_docx_export(report_data):
         for paragraph in cell.paragraphs:
             for run in paragraph.runs:
                 run.bold = True
+                _set_run_font(run, "Helvetica")
 
     for label, value in _build_rows(report_data):
         row_cells = table.add_row().cells
         row_cells[0].text = label
         row_cells[1].text = _display_value(value)
+        for cell in row_cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    _set_run_font(run, "Helvetica")
 
     buffer = BytesIO()
     document.save(buffer)

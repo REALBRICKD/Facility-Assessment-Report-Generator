@@ -56,6 +56,16 @@ def build_location_line(address, city, state):
         return ", ".join(parts)
     return address_text
 
+
+@st.cache_data(show_spinner=False)
+def build_cached_docx_export(report_data):
+    return build_docx_export(report_data)
+
+
+@st.cache_data(show_spinner=False)
+def build_cached_pdf_export(report_data):
+    return build_pdf_export(report_data)
+
 @st.cache_data(show_spinner=False, ttl=3600)
 def fetch_report_data(ccn_text, custom_name, emr, current_census, patient_type, previous_coverage, previous_provider_performance, medical_coverage):
     """
@@ -344,16 +354,17 @@ def run_app():
     if fetch_clicked:
         try:
             normalized_ccn = normalize_ccn(ccn_input)
-            st.session_state.report_data = fetch_report_data(
-                normalized_ccn,
-                custom_name,
-                emr,
-                normalize_numeric_input(current_census_input),
-                patient_type,
-                previous_coverage,
-                previous_provider_performance,
-                medical_coverage,
-            )
+            with st.spinner("Building search results and report data..."):
+                st.session_state.report_data = fetch_report_data(
+                    normalized_ccn,
+                    custom_name,
+                    emr,
+                    normalize_numeric_input(current_census_input),
+                    patient_type,
+                    previous_coverage,
+                    previous_provider_performance,
+                    medical_coverage,
+                )
             st.session_state.lookup_error = None
         except Exception as exc:  # noqa: BLE001
             st.session_state.report_data = None
@@ -367,8 +378,9 @@ def run_app():
         st.markdown(f'<div class="brand-state">{display_value(report_data["state"])}</div>', unsafe_allow_html=True)
         render_performance_dashboard(report_data)
 
-        docx_bytes = build_docx_export(report_data)
-        pdf_bytes = build_pdf_export(report_data)
+        with st.spinner("Preparing downloadable PDF and Word files..."):
+            docx_bytes = build_cached_docx_export(report_data)
+            pdf_bytes = build_cached_pdf_export(report_data)
 
         download_cols = st.columns(2)
         with download_cols[0]:

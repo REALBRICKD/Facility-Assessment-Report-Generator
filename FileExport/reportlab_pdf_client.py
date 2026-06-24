@@ -117,7 +117,7 @@ def build_pdf_export(report_data):
         fontSize=9,
         leading=11,
         alignment=TA_CENTER,
-        textColor=colors.blue,
+        textColor=colors.black,
         spaceAfter=10,
     )
     table_data = [[label, _display_value(value)] for label, value in _build_rows(report_data)]
@@ -146,7 +146,7 @@ def build_pdf_export(report_data):
         Paragraph("FACILITY ASSESSMENT SNAPSHOT", title_style),
         Paragraph(header_state, state_style),
         Paragraph(
-            f'Official Medicare Care Compare profile: <link href="{care_compare_url}">{care_compare_url}</link>',
+            f'Official Medicare Care Compare profile: <link href="{care_compare_url}"><font color="blue">{care_compare_url}</font></link>',
             care_compare_style,
         ),
         Spacer(1, 0.08 * inch),
