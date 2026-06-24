@@ -46,11 +46,13 @@ Some engineering assumptions in this implementation are:
 - Users will supply business-context inputs (EMR, patient type, prior coverage/performance, medical coverage) accurately; these are not CMS-derived.
   - For invalid CCN inputs, the application will specify the input format for the user.
   - In the event of other invalid or empty inputs, that cell will be populated by a fallback value such as "N/A"
-- Plaintext will suffice for company branding. Were that not the case, appending the logo as an image and using custom fonts/color schemes may be necessary.
-- Static fallback values are acceptable when CMS values are unavailable.
+- Plaintext will suffice for company branding. Were that not the case, appending the logo as an image and using custom fonts/color schemes would be the next step of app implementation.
 - Runtime environments running this app are expected to have network access to CMS APIs and dependencies installed for both exports (especially ReportLab for PDF generation).
-- All data necessary will be provided from one of the two datasets listed below.
-- Data security measures such as encoding or backups are not required.
+- All data required by the application will be found in:
+  - CMS Provider Info Dataset
+  - CMS Claims Quality Measure Dataset
+  - Manual user input through the webpage
+- Data security measures such as encoding or backups are not required for an initial implementation.
 
 ## API Endpoints Queried
 
@@ -77,7 +79,7 @@ We will need manual input for:
 - medical coverage
 - Previous Provider Performance from Medelite
 
-## Quick-Start Local Installation Guide
+## Quick-Start Local Development Guide
 
 ### 1. Prerequisites
 
@@ -114,6 +116,9 @@ The project depends on `streamlit`, `requests`, `python-docx`, and `reportlab`.
 ```bash
 streamlit run Hosting/streamlit_client.py
 ```
+
+### 5. Testing
+Unit tests are run automatically upon commit, though they have been provided in the `Testing\` module. 
 
 ## Notes
 
